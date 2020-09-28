@@ -990,3 +990,13 @@ func (c *Client) createBaseCursorOptions() driver.CursorOptions {
 		ServerAPI:      c.serverAPI,
 	}
 }
+
+// IsTopologyConsistent returns false when we have a replica set that claims to
+// have no primary but there exists a primary with all other nodes as secondaries. This
+// specifically works around HELP-13825.
+func (c *Client) IsTopologyConsistent() bool {
+	if topo, ok := c.deployment.(*topology.Topology); ok {
+		return topo.IsConsistent()
+	}
+	return true
+}
