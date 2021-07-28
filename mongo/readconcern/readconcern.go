@@ -8,12 +8,15 @@ package readconcern // import "go.mongodb.org/mongo-driver/mongo/readconcern"
 
 import (
 	"go.mongodb.org/mongo-driver/bson/bsontype"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/x/bsonx/bsoncore"
 )
 
 // ReadConcern for replica sets and replica set shards determines which data to return from a query.
 type ReadConcern struct {
-	level string
+	level            string
+	atClusterTime    *primitive.Timestamp
+	afterClusterTime *primitive.Timestamp
 }
 
 // Option is an option to provide when creating a ReadConcern.
@@ -23,6 +26,20 @@ type Option func(concern *ReadConcern)
 func Level(level string) Option {
 	return func(concern *ReadConcern) {
 		concern.level = level
+	}
+}
+
+// AtClusterTime creates an option that sets the atClusterTime setting of a ReadConcern.
+func AtClusterTime(clusterTime primitive.Timestamp) Option {
+	return func(concern *ReadConcern) {
+		concern.atClusterTime = &clusterTime
+	}
+}
+
+// AfterClusterTime creates an option that sets the afterClusterTime setting of a ReadConcern.
+func AfterClusterTime(clusterTime primitive.Timestamp) Option {
+	return func(concern *ReadConcern) {
+		concern.afterClusterTime = &clusterTime
 	}
 }
 
@@ -71,6 +88,12 @@ func (rc *ReadConcern) MarshalBSONValue() (bsontype.Type, []byte, error) {
 
 	if len(rc.level) > 0 {
 		elems = bsoncore.AppendStringElement(elems, "level", rc.level)
+	}
+	if rc.atClusterTime != nil {
+		elems = bsoncore.AppendTimestampElement(elems, "atClusterTime", rc.atClusterTime.T, rc.atClusterTime.I)
+	}
+	if rc.afterClusterTime != nil {
+		elems = bsoncore.AppendTimestampElement(elems, "afterClusterTime", rc.afterClusterTime.T, rc.afterClusterTime.I)
 	}
 
 	return bsontype.EmbeddedDocument, bsoncore.BuildDocument(nil, elems), nil
