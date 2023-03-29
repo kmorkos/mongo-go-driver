@@ -132,8 +132,6 @@ type Session interface {
 	// Functions to modify mutable session properties.
 	AdvanceClusterTime(bson.Raw) error
 	AdvanceOperationTime(*primitive.Timestamp) error
-
-	session()
 }
 
 // XSession is an unstable interface for internal use only.
@@ -370,10 +368,6 @@ func (s *sessionImpl) AdvanceOperationTime(ts *primitive.Timestamp) error {
 // Client implements the Session interface.
 func (s *sessionImpl) Client() *Client {
 	return s.client
-}
-
-// session implements the Session interface.
-func (*sessionImpl) session() {
 }
 
 // sessionFromContext checks for a sessionImpl in the argued context and returns the session if it
